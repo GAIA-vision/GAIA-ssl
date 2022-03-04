@@ -144,11 +144,11 @@ def main():
 
     rank, _ = get_dist_info()
     if rank == 0:
-        # 结果打印，并输出到日志中
+     
         pass
             
 def single_gpu_knn(model, train_data_loader, val_data_loader, logger, args):
-    model.eval() # BN 确实是需要校正的。。。
+    model.eval() 
     func = lambda **x: model(mode='get_embedding', **x)
     train_results = nondist_forward_collect(func, train_data_loader,
                                       len(train_data_loader.dataset))
@@ -218,25 +218,22 @@ def feature_statistic(embedding, label, classes, logger):
     train_embedding: [N,D] tensor
     tarin_label: [N,] tensor,dtype=torch.long()
     '''
-
-    # 把同一label的feature算一个mean，得到各个类别的ceneter feature [C,D]
     per_center_feature = torch.zeros(classes,embedding.shape[1],dtype=embedding.dtype)
     label_count = torch.zeros(classes,1,dtype=embedding.dtype)
     for idx,each_label in enumerate(label):
         per_center_feature[each_label] += embedding[idx]
         label_count[each_label] += 1
     per_center_feature = per_center_feature / label_count
-    # 算一个矩阵，各个centerfeature之间的距离 [C,C]
+
     per_center_distance = torch.mm(per_center_feature, per_center_feature.T)
     diag = torch.diag(per_center_distance)
     per_center_distance = per_center_distance-torch.diag_embed(diag)
-    # logger记录下每个center 之间的distance mean还有就是minimum distance 和 maximum distance
+
     logger.info('All distance is calculated by cosine similarity. Large means more near')
     logger.info(f'center_distance_mean: {torch.sum(per_center_distance)/classes/classes}')
     for i in range(classes):
         logger.info(f'center_{i} over other center distance: average({torch.sum(per_center_distance[i])/classes}),max({torch.max(per_center_distance[i])}),min({torch.min(per_center_distance[i])})')
     
-    # 求一下每个类别的所有feature 到center feature距离的平均值 [C] 用torch.gather好像更好一些。
     center_feature_copy = torch.zeros(embedding.shape,dtype=embedding.dtype)
     train_len = embedding.shape[0]
     for i in range(train_len):
@@ -271,7 +268,7 @@ def knn_predict(train_results, val_results, logger, args):
     train_label = torch.tensor(train_results['variable_1']).view(-1).long() # [N,]
     val_embedding = torch.tensor(val_results['variable_0']) # [N1, D]
     val_label = torch.tensor(val_results['variable_1']).view(-1).long()  # [N1,]
-    # 这个normalize很重要，MoCo是有明确的normalize，为什么BYOL没有但依旧训练稳定？
+
     train_embedding = F.normalize(train_embedding, dim=1)
     val_embedding = F.normalize(val_embedding, dim=1)
 
@@ -283,7 +280,7 @@ def knn_predict(train_results, val_results, logger, args):
     sim_matrix = torch.mm(val_embedding, train_embedding.T)
     # [N1, K]
     sim_weight, sim_indices = sim_matrix.topk(k=knn_k, dim=-1)
-    # [N1, K]             val_label.expand(train_embedding.size(0), -1) [N] -> [N1, N] 每一列元素相同
+    # [N1, K]            
     sim_labels = torch.gather(train_label.expand(val_embedding.size(0), -1), dim=-1, index=sim_indices)
     # sim_weight = e^(weight/t)
     sim_weight = (sim_weight / knn_t).exp()
@@ -292,7 +289,7 @@ def knn_predict(train_results, val_results, logger, args):
     one_hot_label = torch.zeros(val_embedding.size(0) * knn_k, classes, device=sim_labels.device)
     # [N1*K, C]
     one_hot_label = one_hot_label.scatter(dim=-1, index=sim_labels.view(-1, 1), value=1.0)
-    # weighted score ---> [N, C]                  torch.sum([N1,K,C]*[N1,K,1],dim=1)  每个类别按照对应的相似度获得投票，加权投票，不是平均意义
+    # weighted score ---> [N, C]                  torch.sum([N1,K,C]*[N1,K,1],dim=1) 
     pred_scores = torch.sum(one_hot_label.view(val_embedding.size(0), -1, classes) * sim_weight.unsqueeze(dim=-1), dim=1)
     pred_labels = pred_scores.argsort(dim=-1, descending=True)
     
