@@ -42,7 +42,7 @@ from gaiassl.apis import multi_gpu_test_with_distance
 DISTANCES = {
     'mse': torch.nn.MSELoss,
     'kl': torch.nn.KLDivLoss,
-    'ressl':torch.nn.KLDivLoss # 这个loss到底咋用还是没太确定，主要是有个log操作
+    'ressl':torch.nn.KLDivLoss 
 }
 
 
@@ -167,17 +167,7 @@ def main():
     # prepare model and pretrained weights
     model = build_model(cfg.model)
     ckpt = torch.load(args.checkpoint)['state_dict']
-    '''
-    # 没太get到这个地方是要做什么
-    if args.from_ssl:
-        out_ckpt = dict()
-        for key, value in ckpt.items():
-            if key.startswith('backbone'):
-                out_ckpt[key] = value
-            elif key.startswith('encoder_q.1'):
-                out_ckpt['neck' + key[11:]] = value
-        ckpt = out_ckpt
-    '''
+
     load_state_dict(model, ckpt)
     model = MMDistributedDataParallel(
         model.cuda(),
@@ -199,9 +189,7 @@ def main():
     cfg_distance = cfg.get('distance', {'type': 'kl', 'kwargs': {}})
     distance = DISTANCES[cfg_distance['type']](**cfg_distance['kwargs'])
     
-    '''
-    当时flops.json提取有问题，有重复值。。。删除一下
-    '''
+
     model_metas_no_id = copy.deepcopy(model_metas)
     for each in model_metas_no_id:
         each.pop('index')
@@ -221,12 +209,6 @@ def main():
         # sync model_meta between ranks
         model_meta = broadcast_object(model_meta)
         
-        # manipulate data
-        # 暂时先不manipulate data
-        #input_shape = model_meta['data']['input_shape']
-        #new_scale = input_shape[-1] if isinstance(input_shape, (list, tuple)) else input_shape
-        #scale_manipulator = ScaleManipulator(new_scale)
-        #manipulate_dataset(cfg.data.val, scale_manipulator)
 
         dataset = build_dataset(cfg.data.train)
         data_loader = build_dataloader(
