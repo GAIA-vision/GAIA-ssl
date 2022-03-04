@@ -136,11 +136,11 @@ def main():
 
     rank, _ = get_dist_info()
     if rank == 0:
-        # 结果打印，并输出到日志中
+
         pass
             
 def single_gpu_extract(model, teacher_model, data_loader, logger, args):
-    #model.eval() # BN 确实是需要校正的。。。
+    
     func = lambda **x: (model(mode='extract', **x),teacher_model(mode='extract',**x))
     results = nondist_forward_collect_with_teacher(func, data_loader,
                                       len(data_loader.dataset))
