@@ -9,10 +9,15 @@ An AutoML toolbox specialized in contrastive learning. Coming soon.
   
   mmcv-full 1.3.0
 
-  ## Supernet training
-  ``
-  ## Feature similarity computatoin
-  ``
-  
-  ## Extract subnet
-  ``
+## Supernet training
+``
+## Feature similarity computatoin
+``
+
+## Extract subnet
+``
+
+## Citation
+
+If you find this project useful in your research, please consider cite:
+
