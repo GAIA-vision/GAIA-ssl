@@ -1,5 +1,3 @@
-# 这个还是没办法实现按照img进行inference。。。
-
 import pdb
 import copy
 import random

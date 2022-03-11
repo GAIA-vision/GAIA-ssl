@@ -89,7 +89,7 @@ def main():
     load_state_dict(model, ckpt['state_dict'])
 
     model.eval()
-    model.deploy() # 启用deploy模式
+    model.deploy() 
 
     # prepare model sampler
     model_sampler = build_model_sampler(cfg.train_sampler)
@@ -124,9 +124,9 @@ def main():
             device=next(deployed_model.parameters()).device)
         img_cat = torch.cat((img1.unsqueeze(0), img2.unsqueeze(0)), dim=0)
         batch = img_cat.unsqueeze(0)
-        print("Start")
+        
         _ = deployed_model(batch)
-        print("End")
+        
         # model_name = hashlib.md5(json.dumps(model_meta).encode('utf-8')).hexdigest()[:8]
         print(model_meta)
         dir_name = osp.dirname(args.out_ckpt[:-4])
