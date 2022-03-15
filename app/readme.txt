@@ -1,1 +1,1 @@
-complete config for training, extracting
+configs for training, extracting
