@@ -189,8 +189,6 @@ class DynamicReSSL(BaseSSLearner):
 
         losses = self.head(logits_q, logits_k)
 
-        # SEED 蒸馏那一篇，是先进队列，然后再算logits_q, logits_k, 就是自己跟自己像也放进去了
-        # 可以回来对比一下, 把ReSSL的这个进队出队调前面，看下影响大不大。
         self._dequeue_and_enqueue(k)
 
         return losses
@@ -205,12 +203,9 @@ class DynamicReSSL(BaseSSLearner):
         im_k = img[:, 1, ...].contiguous()
         #pdb.set_trace()
         with torch.no_grad():
-            # 不开启model.eval() 因为可能存在潜在的BN需要calibration的情况。
-            # To to: 改成extract_path = self.getattr(extract_from, None)
-            # assert extract_path is not None,"extract from a wrong module"
-            # 这样就可以不用写成if xxx elif , else的形式了，好像扩展也更友好。
+
             if extract_from == 'encoder_q':
-                # 为啥self.encoder_q返回的是一个列表？
+
                 return self.encoder_q(im_q)[0]
             elif extract_from == 'encoder_k':
                 return self.encoder_k(im_k)[0]

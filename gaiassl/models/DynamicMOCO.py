@@ -218,14 +218,14 @@ class DynamicMOCO(BaseSSLearner):
 
     def forward_get_embedding(self, img, extract_from='encoder_q', **kwargs):
         #pdb.set_trace()
-        # TO DO: the label return need to be change
+        
         label = kwargs.get('label', None)
 
         if img.dim() == 5:
             img = img[:, 0, ...].contiguous()
 
         with torch.no_grad():
-                # 不开启model.eval() 因为可能存在潜在的BN需要calibration的情况。
+               
             if extract_from == 'encoder_q':
                 if label is not None:
                     # tensor [N, D], tensor[N]
