@@ -14,6 +14,7 @@ An AutoML toolbox specialized in contrastive learning.
   ```shell
   CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 bash tools/dist_train.sh apps/dynmoco/configs/local/ar50to101_10pc_bs64_200_epoch.py 8
   ```
+  This is the [checkpoint](https://drive.google.com/file/d/1NqIfts8vvfGGMwhIveJkyZWSMjJjJTBP/view?usp=sharing) we use in our paper.
 
   ## Feature similarity computatoin
   For classification downstream tasks:
