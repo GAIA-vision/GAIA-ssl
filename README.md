@@ -22,11 +22,18 @@ An AutoML toolbox specialized in contrastive learning.
   ```
   For dense prediction downstream tasks:
   ```shell
-  CUDA_VISIBLE_DEVICES=0,1,2,3 bash tools/dist_search.sh apps/dynmoco/configs/local/supernet_dense_search.py /path/to_ckpt workdir 4
+  CUDA_VISIBLE_DEVICES=0,1,2,3 bash tools/dist_search.sh apps/dynmoco/configs/local/supernet_dense_search.py /path/to_supernet_ckpt workdir 4
   ```
 
   ## Extract subnet
-  ``
+  Change the R_specific in apps/dynmoco/configs/local/specific_extract.py according your need, then:
+  ```shell
+  CUDA_VISIBLE_DEVICES=0 bash tools/dist_extract_from_supernet.sh /path/to_supernet_ckpt subnet.pth apps/dynmoco/configs/local/specific_extract.py 4
+  ```
+  Extract backbone from this generated subnet pth:
+  ```shell
+  python tools/extract_backbone_weights.py subnet.pth backbone.pth
+  ```
 
 # Citation
 
