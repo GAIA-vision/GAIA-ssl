@@ -1,5 +1,5 @@
 # GAIA-ssl
-An AutoML toolbox specialized in contrastive learning. Coming soon.
+An AutoML toolbox specialized in contrastive learning. 
 # Install
 
   ## requirements:
