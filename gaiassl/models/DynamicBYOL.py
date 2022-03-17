@@ -118,7 +118,7 @@ class DynamicBYOL(BaseSSLearner):
             img = img[:, 0, ...].contiguous()
 
         with torch.no_grad():
-            # 不开启model.eval() 因为可能存在潜在的BN需要calibration的情况。
+            
             if extract_from == 'online_net':
                 if label is not None:
                     # tensor [N, D], tensor[N]
@@ -126,8 +126,8 @@ class DynamicBYOL(BaseSSLearner):
                 return self.online_net(img)[0]
             else:
                 if label is not None:
-                    return self.encoder_q(img)[0],label
-                return self.encoder_k(img)[0]
+                    return self.target_net(img)[0],label
+                return self.target(img)[0]
 
     def forward(self, img, mode='train', **kwargs):
         #pdb.set_trace()
