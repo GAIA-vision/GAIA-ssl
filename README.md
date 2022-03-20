@@ -39,4 +39,13 @@ An AutoML toolbox specialized in contrastive learning.
 # Citation
 
 If you find this project useful in your research, please consider cite:
-
+```latex
+@misc{chang2022data,
+      title={DATA: Domain-Aware and Task-Aware Pre-training}, 
+      author={Qing Chang and Junran Peng and Lingxie Xie and Jiajun Sun and Haoran Yin and Qi Tian and Zhaoxiang Zhang},
+      year={2022},
+      eprint={2203.09041},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV}
+}
+```
