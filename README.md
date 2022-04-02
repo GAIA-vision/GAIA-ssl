@@ -42,7 +42,7 @@ If you find this project useful in your research, please consider cite:
 
 ```latex
 @misc{chang2022data,
-      title={DATA: Domain-Aware and Task-Aware Pre-training}, 
+      title={DATA: Domain-Aware and Task-Aware Self-supervised Learning}, 
       author={Qing Chang and Junran Peng and Lingxie Xie and Jiajun Sun and Haoran Yin and Qi Tian and Zhaoxiang Zhang},
       year={2022},
       eprint={2203.09041},
