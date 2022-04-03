@@ -104,7 +104,7 @@ def main():
         print(model_meta)
         model_meta = fold_dict(model_meta)
         arch_meta = model_meta['arch']
-        data_meta = model_meta['data']
+        data_meta = model_meta.get('data',{'input_sahpe':224})
         model.manipulate_arch(arch_meta)
         deployed_model = deepcopy(model)
 
