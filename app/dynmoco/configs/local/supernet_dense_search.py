@@ -5,7 +5,7 @@ _base_ = [osp.join(_root_, 'configs/base.py'),'../model_samplers/ar50to101v2.py'
 
 
 manipulate_arch = False
-_data_root_ = '/data1/imagenet'
+_data_root_ = '/data1/Data/imagenet'
 # model settings
 model = dict(
     type='DynamicMOCO',
@@ -16,13 +16,9 @@ model = dict(
         type='DynamicResNet',
         in_channels=3,
         stem_width=64,
-        
         body_depth=[4, 6, 29, 4],
-
         body_width=[80, 160, 320, 640],
-
         num_stages=4,
-
         out_indices=[3],
         conv_cfg=dict(type='DynConv2d'),
         norm_cfg=dict(type='DynBN', requires_grad=True),
@@ -40,48 +36,20 @@ data_source_cfg = dict(
     type='ImageNet',
     return_label=False,
     )
-'''
+
 # ImageNet
 data_train_list = osp.join(_data_root_, 'train_10percent.txt')
 data_train_root = osp.join(_data_root_, 'ILSVRC2012_img_train')
-'''
 
-# PASCAL VOC
-data_train_list = '/data2/Data/PASCALVOC07+12/list.txt'
-data_train_root = '/data2/Data/PASCALVOC07+12'
-
-# coco
-#'''
-#data_train_root = '/data2/Data/coco'
-#data_train_list = '/data2/Data/coco/list.txt'
-train_pipeline = [
-    dict(type='mmdet_Resize', img_scale=(1333, 800), keep_ratio=True),
-    dict(type='mmdet_Pad', size_divisor=32),
-    dict(type='RandomCrop', size=480),
-]
-#'''
-
-'''
-# cityscapes
-data_train_root = '/data2/Data/cityscapes/leftImg8bit/train'
-data_train_list = '/data2/Data/cityscapes/list.txt'
-
-
-train_pipeline = [
-    dict(type='mmdet_Resize', img_scale=(2049, 1025)),
-    dict(type='RandomCrop', size=(480,480)),
-]
-'''
 
 dataset_type = 'ContrastiveDataset'
 img_norm_cfg = dict(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 
-'''
+# for other dataset, please keep the same test pipeline  except for the crop, too large crop will case memory out
 train_pipeline = [
-    dict(type='RandomResizedCrop', size=224, scale=(1., 1.)), 
-    dict(type='RandomHorizontalFlip'),
+    dict(type='Resize', size=256),
+    dict(type='CenterCrop', size=224),
 ]
-'''
 
 # prefetch
 prefetch = False
@@ -89,7 +57,7 @@ if not prefetch:
     train_pipeline.extend([dict(type='ToTensor'), dict(type='Normalize', **img_norm_cfg)])
 
 data = dict(
-    imgs_per_gpu=1,  # total 32*8=256
+    imgs_per_gpu=16,  # total 32*8=256
     workers_per_gpu=2,
     drop_last=True,
     train=dict(
@@ -109,7 +77,7 @@ checkpoint_config = dict(interval=20)
 total_epochs = 1
 work_dir = "/data2/OpenSelfSup-gaia/workdirs/moco"
 
-model_space_path = '../../..../hubs/flops.json'
+model_space_path = 'hubs/flops.json'
 model_sampling_rules = dict(
     type='sequential',
     rules=[
