@@ -174,21 +174,24 @@ def main():
         device_ids=[torch.cuda.current_device()],
         broadcast_buffers=False)
 
+    #pdb.set_trace()
+    distance = cfg.get('distance', 'cosine')
+    
+
     # collect model of interests
     sampled_model_metas = []
     model_space = ModelSpaceManager.load(cfg.model_space_path)
     rule = build_sample_rule(cfg.model_sampling_rules)
     sub_model_space = model_space.ms_manager.apply_rule(rule)
     model_metas = sub_model_space.ms_manager.pack()
+    dist.barrier()
     if rank == 0:
         print("Please notice, the encoder_k always keeps largest architecture")
     for each in model_metas:
         each['arch'].pop('encoder_k')
     #pdb.set_trace()
     # set up distance
-    cfg_distance = cfg.get('distance', {'type': 'kl', 'kwargs': {}})
-    distance = DISTANCES[cfg_distance['type']](**cfg_distance['kwargs'])
-    
+
 
     model_metas_no_id = copy.deepcopy(model_metas)
     for each in model_metas_no_id:
@@ -211,7 +214,14 @@ def main():
         
 
         dataset = build_dataset(cfg.data.train)
-        data_loader = build_dataloader(
+        teacher_data_loader = build_dataloader(
+            dataset,
+            imgs_per_gpu=cfg.data.imgs_per_gpu,
+            workers_per_gpu=cfg.data.workers_per_gpu,
+            dist=True,
+            shuffle=False)
+
+        student_data_loader = build_dataloader(
             dataset,
             imgs_per_gpu=cfg.data.imgs_per_gpu,
             workers_per_gpu=cfg.data.workers_per_gpu,
@@ -222,7 +232,7 @@ def main():
 
         # TODO:run test
         print("start running")
-        outputs = multi_gpu_test_with_distance(model, model_meta, data_loader, distance, rank)
+        outputs = multi_gpu_test_with_distance(model, model_meta, teacher_data_loader, student_data_loader, distance, rank)
         dist.barrier()
         #pdb.set_trace()
         result_model_meta = deepcopy(model_meta)
