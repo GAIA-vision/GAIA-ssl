@@ -29,7 +29,7 @@ An AutoML toolbox specialized in contrastive learning.
   ## Extract subnet
   Change the R_specific in app/dynmoco/configs/local/specific_extract.py according your need, then:
   ```shell
-  CUDA_VISIBLE_DEVICES=0 bash tools/dist_extract_from_supernet.sh /path/to_supernet_ckpt subnet.pth apps/dynmoco/configs/local/specific_extract.py 4
+  CUDA_VISIBLE_DEVICES=0 bash tools/dist_extract_from_supernet.sh /path/to_supernet_ckpt subnet.pth apps/dynmoco/configs/local/specific_extract.py 1
   ```
   Extract backbone from this generated subnet pth:
   ```shell
