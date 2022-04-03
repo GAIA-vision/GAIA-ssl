@@ -66,7 +66,7 @@ def main():
     ckpt = torch.load(args.src_ckpt, map_location='cpu')
     if 'LOCAL_RANK' not in os.environ:
         os.environ['LOCAL_RANK'] = str(args.local_rank)
-
+    pdb.set_trace()
     # abandon sync bn
     cfg = Config.fromfile(args.config)
     cfg = prepare_cfg(cfg)
@@ -104,7 +104,7 @@ def main():
         print(model_meta)
         model_meta = fold_dict(model_meta)
         arch_meta = model_meta['arch']
-        data_meta = model_meta.get('data',{'input_sahpe':224})
+        data_meta = {'input_shape':224}
         model.manipulate_arch(arch_meta)
         deployed_model = deepcopy(model)
 
@@ -129,9 +129,13 @@ def main():
         
         # model_name = hashlib.md5(json.dumps(model_meta).encode('utf-8')).hexdigest()[:8]
         print(model_meta)
+        pdb.set_trace()
         dir_name = osp.dirname(args.out_ckpt[:-4])
-        os.makedirs(dir_name, exist_ok=True)
-        save_checkpoint(deployed_model, args.out_ckpt[:-4]+"_"+str(n)+".pth")
+        if dir_name == '':
+            save_checkpoint(deployed_model, args.out_ckpt[:-4]+"_"+str(n)+".pth")
+        else:
+            os.makedirs(dir_name, exist_ok=True)
+            save_checkpoint(deployed_model, args.out_ckpt[:-4]+"_"+str(n)+".pth")
 
         if rank == 0:
             if n % interval == 0:
