@@ -35,7 +35,9 @@ An AutoML toolbox specialized in contrastive learning.
   ```shell
   python tools/extract_backbone_weights.py subnet.pth backbone.pth
   ```
-
+  
+  ## Precautions
+  FP16 and gradient accumulate can be used in original openself repo, but they can not be used in this version.
 # Citation
 
 If you find this project useful in your research, please consider cite:
