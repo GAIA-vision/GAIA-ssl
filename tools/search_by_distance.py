@@ -36,7 +36,7 @@ from gaiavision.model_space import (ModelSpaceManager,
 
 import gaiassl
 from gaiassl.datasets import ScaleManipulator, manipulate_dataset
-from gaiassl.apis import multi_gpu_test_with_distance
+from gaiassl.apis import multi_gpu_test_with_distance,multi_gpu_test_with_dense_distance
 
 
 DISTANCES = {
@@ -51,10 +51,10 @@ def parse_args():
     parser.add_argument('config', help='train config file path')
     parser.add_argument('checkpoint', help='train config file path')
     parser.add_argument(
-        '--from_ssl',
+        '--dense',
         type=bool,
-        default=True,
-        help='whether pretrained weights are imported from ssl')
+        default=False,
+        help='whether compare dense feature similarity')
     parser.add_argument(
         '--model_space_path',
         type=str,
@@ -177,7 +177,6 @@ def main():
     #pdb.set_trace()
     distance = cfg.get('distance', 'cosine')
     
-
     # collect model of interests
     sampled_model_metas = []
     model_space = ModelSpaceManager.load(cfg.model_space_path)
@@ -232,8 +231,13 @@ def main():
 
         # TODO:run test
         print("start running")
-        outputs = multi_gpu_test_with_distance(model, model_meta, teacher_data_loader, student_data_loader, distance, rank)
-        dist.barrier()
+        if args.dense:
+            print("dense")
+            outputs = multi_gpu_test_with_dense_distance(model, model_meta, teacher_data_loader, student_data_loader, distance, rank)
+        else:
+            print("global")
+            outputs = multi_gpu_test_with_distance(model, model_meta, teacher_data_loader, student_data_loader, distance, rank)
+        print("End")
         #pdb.set_trace()
         result_model_meta = deepcopy(model_meta)
         metrics = {}
