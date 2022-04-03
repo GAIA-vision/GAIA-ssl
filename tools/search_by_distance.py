@@ -240,10 +240,10 @@ def main():
         
         if rank == 0:
             # TODO: replace the ugly workaround
-            koi = ['mean']
+            koi = list(outputs.keys())
             for name in koi:
                 metrics[name] = outputs[name]
-
+            
             metric_meta = result_model_meta.setdefault('metric', {})
             metric_meta[args.metric_tag] = metrics
             result_model_meta['metric'] = metric_meta
@@ -251,6 +251,11 @@ def main():
             logger.info('-- model meta:')
             logger.info(json.dumps(sampled_model_metas[-1], indent=4))
         dist.barrier()
+
+    if rank == 0:
+        sub_model_space = ModelSpaceManager.load(sampled_model_metas)
+        sub_model_space.ms_manager.dump(save_path)
+    dist.barrier()
 
     if rank == 0:
         sub_model_space = ModelSpaceManager.load(sampled_model_metas)
