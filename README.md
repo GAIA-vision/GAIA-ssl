@@ -19,7 +19,7 @@ An AutoML toolbox specialized in contrastive learning.
   ## Feature similarity computatoin
   For classification downstream tasks:
   ```shell
-  CUDA_VISIBLE_DEVICES=0,1,2,3 bash tools/dist_search.sh apps/dynmoco/configs/local/supernet_search.py /path/to_supernet_ckpt workdir 4
+  CUDA_VISIBLE_DEVICES=0,1,2,3 bash tools/dist_search.sh app/dynmoco/configs/local/supernet_search.py /path/to_supernet_ckpt workdir 4
   ```
   For dense prediction downstream tasks:
   ```shell
@@ -27,7 +27,7 @@ An AutoML toolbox specialized in contrastive learning.
   ```
 
   ## Extract subnet
-  Change the R_specific in apps/dynmoco/configs/local/specific_extract.py according your need, then:
+  Change the R_specific in app/dynmoco/configs/local/specific_extract.py according your need, then:
   ```shell
   CUDA_VISIBLE_DEVICES=0 bash tools/dist_extract_from_supernet.sh /path/to_supernet_ckpt subnet.pth apps/dynmoco/configs/local/specific_extract.py 4
   ```
