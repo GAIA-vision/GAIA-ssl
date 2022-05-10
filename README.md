@@ -12,7 +12,7 @@ An AutoML toolbox specialized in contrastive learning.
 # Command
   ## Supernet training
   ```shell
-  CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 bash tools/dist_train.sh apps/dynmoco/configs/local/ar50to101_10pc_bs64_200_epoch.py 8
+  CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 bash tools/dist_train.sh app/dynmoco/configs/local/ar50to101_10pc_bs64_200_epoch.py 8
   ```
   This is the [checkpoint](https://drive.google.com/file/d/1NqIfts8vvfGGMwhIveJkyZWSMjJjJTBP/view?usp=sharing) we use in our paper. And don't forget to change the data   path in all config files before running these commands.
 
@@ -29,7 +29,7 @@ An AutoML toolbox specialized in contrastive learning.
   ## Extract subnet
   Change the R_specific in app/dynmoco/configs/local/specific_extract.py according your need, then:
   ```shell
-  CUDA_VISIBLE_DEVICES=0 bash tools/dist_extract_from_supernet.sh /path/to_supernet_ckpt subnet.pth apps/dynmoco/configs/local/specific_extract.py 1
+  CUDA_VISIBLE_DEVICES=0 bash tools/dist_extract_from_supernet.sh /path/to_supernet_ckpt subnet.pth app/dynmoco/configs/local/specific_extract.py 1
   ```
   Extract backbone from this generated subnet pth:
   ```shell
