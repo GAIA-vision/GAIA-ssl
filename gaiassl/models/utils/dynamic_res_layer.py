@@ -1,12 +1,12 @@
 # standard library
 import warnings
-import pdb
 
 # 3rd party library
 from torch import nn as nn
 
 # mm library
 from mmcv.cnn import build_conv_layer
+from mmseg.models.utils import ResLayer
 
 # gaia lib
 from gaiavision.core import DynamicMixin
@@ -40,7 +40,7 @@ class DynamicResLayer(nn.ModuleList, DynamicMixin):
         if width is not None:
             self.width_state = depth
 
-        for k, v in kwargs.items():
+        for k,v in kwargs.items():
             setattr(self, f'{k}_state', v)
 
     def __init__(self,
@@ -49,12 +49,14 @@ class DynamicResLayer(nn.ModuleList, DynamicMixin):
                  planes,
                  depth,
                  stride=1,
+                 dilation=1,
                  avg_down=False,
                  conv_cfg=None,
                  norm_cfg=None,
                  downsample_first=True,
+                 contract_dilation=False,
                  **kwargs):
-        # TODO: fix the workaround
+        # TODO: fix the  workaround
         if conv_cfg['type'] != 'DynConv2d':
             warnings.warn('Non-dynamic-conv detected in dynamic block.')
         if 'Dyn' not in norm_cfg['type']:
@@ -73,59 +75,75 @@ class DynamicResLayer(nn.ModuleList, DynamicMixin):
             if avg_down:
                 conv_stride = 1
                 downsample.append(
-                    nn.AvgPool2d(kernel_size=stride,
-                                 stride=stride,
-                                 ceil_mode=True,
-                                 count_include_pad=False))
+                    nn.AvgPool2d(
+                        kernel_size=stride,
+                        stride=stride,
+                        ceil_mode=True,
+                        count_include_pad=False))
             downsample.extend([
-                build_conv_layer(conv_cfg,
-                                 inplanes,
-                                 planes * block.expansion,
-                                 kernel_size=1,
-                                 padding=0,
-                                 stride=conv_stride,
-                                 bias=False),
+                build_conv_layer(
+                    conv_cfg,
+                    inplanes,
+                    planes * block.expansion,
+                    kernel_size=1,
+                    padding=0,
+                    stride=conv_stride,
+                    bias=False),
                 build_norm_layer(norm_cfg, planes * block.expansion)[1]
             ])
             downsample = nn.Sequential(*downsample)
 
         layers = []
+
+        # add contract_dilation
+        if dilation > 1 and contract_dilation:
+            first_dilation = dilation // 2
+        else:
+            first_dilation = dilation
+
         if downsample_first:
             layers.append(
-                block(inplanes=inplanes,
-                      planes=planes,
-                      stride=stride,
-                      downsample=downsample,
-                      conv_cfg=conv_cfg,
-                      norm_cfg=norm_cfg,
-                      **kwargs))
+                block(
+                    inplanes=inplanes,
+                    planes=planes,
+                    stride=stride,
+                    dilation=first_dilation, # add dilation
+                    downsample=downsample,
+                    conv_cfg=conv_cfg,
+                    norm_cfg=norm_cfg,
+                    **kwargs))
             inplanes = planes * block.expansion
             for _ in range(1, depth):
                 layers.append(
-                    block(inplanes=inplanes,
-                          planes=planes,
-                          stride=1,
-                          conv_cfg=conv_cfg,
-                          norm_cfg=norm_cfg,
-                          **kwargs))
+                    block(
+                        inplanes=inplanes,
+                        planes=planes,
+                        stride=1,
+                        dilation=dilation, # add dilation
+                        conv_cfg=conv_cfg,
+                        norm_cfg=norm_cfg,
+                        **kwargs))
 
         else:  # downsample_first=False is for HourglassModule
+            assert 1==2
             for _ in range(depth - 1):
                 layers.append(
-                    block(inplanes=inplanes,
-                          planes=inplanes,
-                          stride=1,
-                          conv_cfg=conv_cfg,
-                          norm_cfg=norm_cfg,
-                          **kwargs))
+                    block(
+                        inplanes=inplanes,
+                        planes=inplanes,
+                        stride=1,
+                        conv_cfg=conv_cfg,
+                        norm_cfg=norm_cfg,
+                        **kwargs))
             layers.append(
-                block(inplanes=inplanes,
-                      planes=planes,
-                      stride=stride,
-                      downsample=downsample,
-                      conv_cfg=conv_cfg,
-                      norm_cfg=norm_cfg,
-                      **kwargs))
+                block(
+                    inplanes=inplanes,
+                    planes=planes,
+                    stride=stride,
+                    downsample=downsample,
+                    conv_cfg=conv_cfg,
+                    norm_cfg=norm_cfg,
+                    **kwargs))
         super(DynamicResLayer, self).__init__(layers)
 
     def manipulate_depth(self, depth):
