@@ -236,7 +236,7 @@ class DynamicMOCO(BaseSSLearner):
                     return self.encoder_k(img)[0],label
                 return self.encoder_k(img)[0]
 
-    def forward(self, img, mode='train', **kwargs):
+    def forward(self, img, mode='train',extract_from='encoder_q', **kwargs):
         if mode == 'train':
             return self.forward_train(img, **kwargs)
         elif mode == 'test':
@@ -244,7 +244,12 @@ class DynamicMOCO(BaseSSLearner):
         elif mode == 'extract':
             if img.dim() == 5:
                 img = img[:, 0, ...].contiguous()
-            return self.backbone(img)
+            if extract_from == 'encoder_q':
+                return self.backbone(img)
+            elif extract_from == 'encoder_k':
+                return self.encoder_k[0](img)
+            else:
+                raise Exception("No such extract from mode: {}".format(extract_from))
         elif mode == 'get_embedding':
             return self.forward_get_embedding(img, **kwargs) 
         else:
