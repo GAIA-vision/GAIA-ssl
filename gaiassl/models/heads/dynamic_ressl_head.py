@@ -29,7 +29,7 @@ class DynamicResslHead(nn.Module):
             dict[str, Tensor]: A dictionary of loss components.
         """
         losses = dict()
-        # -plogq 算cross entropy, 有个问题一直没想清楚，-qlogp 和 -plogq 有本质区别嘛？
+
         losses['loss_contra'] = - torch.sum( F.softmax(logits_k.detach() / self.temperature, dim=1) \
                                              * F.log_softmax(logits_q / 0.1, dim=1), dim=1).mean()
         return losses
